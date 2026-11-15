@@ -1,131 +1,75 @@
-# 🌱 Field Shift – Smart Agricultural Decision Support System
+Field Shift — a crop rotation helper for Belagavi district
 
-**Empowering farmers with data-driven agricultural decisions.**
+**Team Galactic Geeks — NASA Space Apps Challenge 2026**  
+Challenge: Field Shift: Adapting Farms with NASA Data
 
-Field Shift is a smart agricultural decision support system developed using Python and Streamlit. It helps farmers make informed crop and field management decisions by analyzing agricultural inputs, soil conditions, and location-related factors.
+Team Members:Sifa Kotwal, Sakshi Bhirade, Amulya B.K., Bushra Soudagar, Asmiya Bepari  
+Institution: KLE Society's College of Computer Applications, Belagavi
 
-The platform provides crop suitability scores, recommendations, and important risk warnings to support better agricultural planning and sustainable farming practices.
+What it is
 
----
+A decision-support tool for farmers in Belagavi district. A farmer enters taluk, soil, season, last crop, irrigation, and what matters most (soil health, saving water, or a safe harvest). The tool scores each crop on four things — rotation, soil, climate, water use — shows the best crops, compares three strategies (their usual crop and the two best others, each with why, evidence, benefits, information gaps and risks), and tells the farmer if the best choice would change when an unconfirmed water need is lower or higher than assumed.
 
-## 🚀 Key Features
+It supports the farmer and the local agriculture office. It does not replace them.
 
-- **Smart Crop Recommendations:** Helps identify suitable crops based on selected agricultural conditions.
-- **Crop Suitability Scoring:** Provides scores to help users evaluate crop suitability.
-- **Soil-Based Analysis:** Uses soil-related inputs to support agricultural decision-making.
-- **Risk Warnings:** Highlights important agricultural warnings before displaying results.
-- **Interactive Dashboard:** Simple and user-friendly interface built with Streamlit.
-- **Kannada Language Support:** Provides a Kannada-first experience to improve accessibility for local farmers.
-- **Data-Driven Decisions:** Uses agricultural datasets and scoring logic to generate recommendations.
+It works in Kannada and English. It is a clear point-scoring system, not machine learning. All weights and thresholds sit in one settings block in `scoring.py`.
 
-## 🛠️ Technology Stack
-
-| Technology | Purpose |
-|---|---|
-| Python | Core programming language |
-| Streamlit | Interactive web application |
-| Pandas | Data processing |
-| CSV Datasets | Agricultural data storage |
-| HTML & CSS | UI customization |
-
-## 📸 Application Preview
-
-Add screenshots of your application here.
-
-Suggested screenshots:
-- Home page / Dashboard
-- Soil and location selection
-- Crop recommendation results
-- Crop suitability scores
-- Risk warnings
-- Kannada language interface
-
-## ⚙️ Installation and Setup
-
-Follow these steps to run Field Shift locally.
-
-**1. Clone the repository**
-
-```bash
-git clone https://github.com/YOUR-USERNAME/Field-Shift.git
-```
-
-**2. Navigate to the project directory**
-
-```bash
-cd Field-Shift
-```
-
-**3. Create a virtual environment (recommended)**
-
-```bash
-python -m venv venv
-```
-
-**4. Activate the virtual environment**
-
-Windows:
-
-```bash
-venv\Scripts\activate
-```
-
-**5. Install dependencies**
+Run it
 
 ```bash
 pip install -r requirements.txt
-```
-
-**6. Run the Streamlit application**
-
-```bash
 streamlit run app.py
 ```
 
-The application will open in your browser at:
+Run the tests
 
-```text
-http://localhost:8501
+```bash
+python check_tests.py
 ```
 
-## 📂 Project Structure
+Expected: ALL PASS — 5 fixed test cases, plus the assumption check for the first case: changes, now [chickpea, rabi_jowar], low [chickpea], high [rabi_jowar].
 
-```text
-Field-Shift/
-│
-├── app.py              # Main Streamlit application
-├── scoring.py          # Crop scoring and recommendation logic
-├── requirements.txt    # Python dependencies
-├── *.csv               # Agricultural datasets
-├── README.md           # Project documentation
-└── ...
-```
+NASA data used
 
-*Note: The structure above is illustrative. Adjust it to match the actual files in your repository.*
+NASA POWER daily data, 1981–2025, at three points: Belagavi, Khanapur (west, wet) and Athani (east, dry). NASA POWER is a model estimate, so we use it only to compare zones and years, not to give exact rain.
 
-## 🎯 Project Objectives
+What it shows (recalculated from the yearly files in `data/`):**
 
-1. Make agricultural decision-making more accessible.
-2. Help farmers evaluate crop suitability using relevant agricultural data.
-3. Present crop recommendations in an understandable format.
-4. Highlight potential agricultural risks through warnings.
-5. Encourage informed and sustainable farming practices.
+- Dry spell of 7+ days in July–August: Athani 38 of 45 years, Belagavi 12 of 45, Khanapur 10 of 45.
+- Low stored soil moisture on 1 October (root-zone wetness below 0.8, our own cut-off): Athani 38 of 45 years, Belagavi 9 of 45, Khanapur 9 of 45.
+- Warming about 0.11 to 0.13 °C per decade in all three zones.
+- Monsoon rain is rising only in Khanapur, under two tests. Belagavi and Athani show no reliable rain trend. We do not quote absolute rainfall in mm: NASA POWER appears to overstate absolute rain compared with station records (unverified), so we use risky-year counts instead.
+- The droughts of 2003 and 2015 and the floods of 2019 show up in this NASA POWER data as deficit / excess years in all three zones.
 
-## 🌍 Impact
+Chart: `evidence_simple.png` (45 squares per zone).
 
-Field Shift aims to bridge the gap between agricultural data and practical farming decisions.
+Next step: cross-check these zones with NASA SMAP soil moisture, GPM IMERG rainfall and NDVI. Many other datasets on the challenge resource list (for example Web Soil Survey, SSURGO and PRISM) cover only the United States, so for local soil and crop facts we used Indian sources: UAS Dharwad and ICAR documents, and one KVK expert.
 
-By providing an accessible digital platform with regional language support, the project seeks to make data-driven agricultural guidance easier to understand and use.
+Local sources
 
-## 👩‍💻 Developed By
+- Rotations:UAS Dharwad district contingency plan and ICAR documents, for black soil. They list these pairs as common systems on black soil, not as advice written for Belagavi.
+- Expert:Dr. D. A. Mhetre, Senior Scientist and Head, ICAR-BIRDS KVK Tukkanatti, Belagavi.
+- Contact was through WhatsApp with our teammate Amulya, on 22 October and 31 October 2026, with a follow-up reply on 2 November 2026. He allowed us to use his name and suggested corrections, including sugarcane-based cropping, intercropping with pulses and oilseeds, and rotation after sugarcane. He said soybean residue leaves nitrogen in the soil, and for Athani advised soybean with pigeon pea, and chickpea or rabi jowar in rabi if water is available. His two answers on water order were not fully consistent, and he did not answer our follow-up on whether the order changes by zone, so we did not use his water order for the scores.
+- Taluk-to-zone map: from a 2011 CRIDA plan, not yet opened by the team. It lists 10 taluks; the district may have 15. If your taluk is not listed, choose the nearest one — results are approximate.
 
-**Project:** Field Shift – Smart Agricultural Decision Support System
+Honest limits
 
-**Domain:** Agriculture | Data Analytics | Decision Support Systems
+- The water need of chickpea, green gram and black gram is not confirmed by an expert, so the tool treats it as medium and warns about it. That is why several choices come out equal.
+- Pigeon pea and mixed cropping are not in the tool yet, and neither is sugarcane. The KVK expert advised all three.
+- No sourced rotations for red soil, or for rabi followed by kharif.
+- No yield, price or profit numbers — we have none.
+- The Kannada text was checked by a Kannada-speaking team member, not an independent reviewer.
+- No verified Belagavi farmer interviews yet. Our interview questions are ready; testing with Belagavi farmers is a next step. Do not treat sample answers in our interview draft as real farmer quotes.
 
-**Technology:** Python, Streamlit
+AI use
 
----
+AI tools helped with code, Kannada drafts, research summaries, and report and slide drafts. All numbers, scores and claims in this repo were checked by the team against the files in `data/` and the sources above. No AI-generated images are used in the project.
 
-⭐ If you find this project interesting, consider giving this repository a star!
+Files
 
+- `app.py` — Streamlit frontend (Sakshi Bhirade). It only calls `scoring.py`; it never changes a number or a weight.
+- `scoring.py` — all scoring logic and settings (Sifa Kotwal).
+- `crops.csv`, `rotations.csv`, `other_previous_crops.csv` — crop and rotation tables.
+- `check_tests.py` — the 5 fixed test cases.
+- `data/` — NASA POWER yearly files and zone tables.
+- `evidence_simple.png` — the chart used in the slide deck.
