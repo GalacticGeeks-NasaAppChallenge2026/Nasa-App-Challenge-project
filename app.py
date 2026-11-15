@@ -384,65 +384,101 @@ div[data-testid="stRadio"] > label {
     margin-bottom: 0.3rem !important;
 }
 
-/* ── Primary button ── */
-button[kind="primary"],
+/* ── Action Buttons (scoped specifically to st.button elements) ── */
+div[data-testid="stButton"] > button,
+div[data-testid="stButton"] > button[kind="primary"],
+div[data-testid="stButton"] > button[kind="secondary"],
+.stButton > button,
 .stButton > button[kind="primary"],
-button[kind="primary"] p,
-.stButton > button[kind="primary"] p,
-button[kind="primary"] span,
-.stButton > button[kind="primary"] span {
-    background: linear-gradient(160deg, var(--forest-green-mid) 0%, var(--forest-green-dark) 100%) !important;
+.stButton > button[kind="secondary"] {
+    background: #286332 !important;
+    background-color: #286332 !important;
     color: #FFFFFF !important;
-    border: none !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    border: 1.5px solid #6B8F5E !important;
     border-radius: var(--radius-md) !important;
-    padding: 0.9rem 2.2rem !important;
-    font-size: 1.1rem !important;
+    padding: 0.8rem 2.0rem !important;
+    font-size: 1.05rem !important;
     font-weight: 700 !important;
     letter-spacing: 0.02em !important;
-    box-shadow: var(--shadow-green) !important;
+    box-shadow: 0 4px 14px rgba(40,99,50,0.22) !important;
     transition: var(--transition) !important;
-    min-height: 54px !important;
+    min-height: 50px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    box-sizing: border-box !important;
 }
 
-button[kind="primary"] p,
-.stButton > button[kind="primary"] p,
-button[kind="primary"] span,
-.stButton > button[kind="primary"] span {
+/* Ensure inner <p> and <span> inside buttons inherit crisp white text and center alignment */
+div[data-testid="stButton"] > button p,
+div[data-testid="stButton"] > button span,
+div[data-testid="stButton"] > button [data-testid="stMarkdownContainer"] p,
+.stButton > button p,
+.stButton > button span,
+.stButton > button [data-testid="stMarkdownContainer"] p {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
     background: transparent !important;
+    background-color: transparent !important;
     box-shadow: none !important;
+    border: none !important;
     padding: 0 !important;
     margin: 0 !important;
+    font-size: inherit !important;
+    font-weight: 700 !important;
+    font-family: 'Inter', 'Noto Sans Kannada', sans-serif !important;
+    display: inline-block !important;
+    text-align: center !important;
 }
 
-button[kind="primary"]:hover,
-.stButton > button[kind="primary"]:hover {
-    box-shadow: 0 10px 28px rgba(42,92,42,0.32) !important;
-    transform: translateY(-2px) !important;
-    filter: brightness(1.07) !important;
+/* Hover state: lighter green background with crisp white text */
+div[data-testid="stButton"] > button:hover,
+div[data-testid="stButton"] > button[kind="primary"]:hover,
+div[data-testid="stButton"] > button[kind="secondary"]:hover,
+.stButton > button:hover,
+.stButton > button[kind="primary"]:hover,
+.stButton > button[kind="secondary"]:hover {
+    background: #337B3E !important;
+    background-color: #337B3E !important;
+    border-color: #8FA897 !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    box-shadow: 0 6px 20px rgba(40,99,50,0.32) !important;
+    transform: translateY(-1px) !important;
 }
 
-button[kind="primary"]:active,
-.stButton > button[kind="primary"]:active {
+div[data-testid="stButton"] > button:hover p,
+div[data-testid="stButton"] > button:hover span,
+div[data-testid="stButton"] > button:hover [data-testid="stMarkdownContainer"] p,
+.stButton > button:hover p,
+.stButton > button:hover span,
+.stButton > button:hover [data-testid="stMarkdownContainer"] p {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* Focus state: clear, accessible green focus ring */
+div[data-testid="stButton"] > button:focus,
+div[data-testid="stButton"] > button:focus-visible,
+.stButton > button:focus,
+.stButton > button:focus-visible {
+    outline: none !important;
+    border-color: #9BBD8D !important;
+    box-shadow: 0 0 0 3px rgba(107, 143, 94, 0.5), 0 4px 14px rgba(40,99,50,0.25) !important;
+}
+
+/* Active / pressed state */
+div[data-testid="stButton"] > button:active,
+.stButton > button:active {
     transform: translateY(0) !important;
-    box-shadow: var(--shadow-md) !important;
-}
-
-/* ── Secondary / ghost button ── */
-.stButton > button,
-.stButton > button p,
-.stButton > button span {
-    color: var(--text-primary) !important;
-    border-radius: var(--radius-md) !important;
-    min-height: 46px !important;
-    font-size: 0.97rem !important;
-    font-weight: 600 !important;
-    border: 2px solid var(--border-mid) !important;
-    transition: var(--transition) !important;
-}
-
-.stButton > button:hover {
-    border-color: var(--sage-green) !important;
-    background: var(--sage-ultra-pale) !important;
+    background: #1E4D27 !important;
+    background-color: #1E4D27 !important;
+    box-shadow: 0 2px 8px rgba(40,99,50,0.3) !important;
 }
 
 /* ── Strategy Expanders & General Expander Styling ── */
@@ -630,14 +666,10 @@ small, .stTextInput .instructions {
         -webkit-text-fill-color: #245B32 !important;
     }
 
-    button[kind="primary"],
-    .stButton > button[kind="primary"] {
-        min-height: 58px !important;
-        font-size: 1.15rem !important;
-    }
-
+    div[data-testid="stButton"] > button,
     .stButton > button {
-        min-height: 50px !important;
+        min-height: 52px !important;
+        font-size: 1.08rem !important;
     }
 
     [data-testid="stExpander"] details > summary,
@@ -653,10 +685,10 @@ small, .stTextInput .instructions {
     .block-container {
         padding: 0.1rem 0.5rem 2rem 0.5rem !important;
     }
-    button[kind="primary"],
-    .stButton > button[kind="primary"] {
-        min-height: 60px !important;
-        font-size: 1.2rem !important;
+    div[data-testid="stButton"] > button,
+    .stButton > button {
+        min-height: 54px !important;
+        font-size: 1.1rem !important;
         border-radius: 12px !important;
     }
 }
@@ -1105,13 +1137,15 @@ def render_form(lang, i, t_fn):
     </div>
     """, unsafe_allow_html=True)
 
+    season_key = f"season_input_{v}"
+    season_index = None if season_key in st.session_state else 0
     season = st.radio(
         t_fn("season"),
         ["kharif", "rabi"],
         horizontal=True,
         format_func=lambda x: SEASON[x][i],
-        index=0,
-        key=f"season_input_{v}",
+        index=season_index,
+        key=season_key,
     )
 
     # ── Crop History ──
@@ -1155,20 +1189,26 @@ def render_form(lang, i, t_fn):
     """, unsafe_allow_html=True)
 
     irrigation_key = f"irrigation_input_{v}"
+    irr_index = None if irrigation_key in st.session_state else 1
 
     irrigation = st.radio(
         t_fn("irr"),
         [True, False],
         horizontal=True,
         format_func=lambda x: t_fn("yes") if x else t_fn("no"),
-        index=1,
+        index=irr_index,
         key=irrigation_key,
     )
+    st.session_state["irrigation"] = irrigation
+
+    priority_key = f"priority_input_{v}"
+    priority_index = None if priority_key in st.session_state else 0
     priority = st.radio(
         t_fn("pri"),
         list(PRIORITY),
         format_func=lambda x: PRIORITY[x][i],
-        key=f"priority_input_{v}",
+        index=priority_index,
+        key=priority_key,
     )
 
     # Usual crop for comparison
@@ -1300,12 +1340,13 @@ def render_results(inputs, lang, i, t_fn):
         st.markdown(card_html, unsafe_allow_html=True)
 
     # NASA facts
-    zone_label = sc.WORDS[lang]["zones"].get(zone, zone)
-    dry_spell_pct = ZONE_FACTS[zone] if isinstance(ZONE_FACTS[zone], (int, float, str)) else ZONE_FACTS[zone][1 if lang == "kn" else 0]
+    zone_key = zone.capitalize() if zone.capitalize() in ZONE_FACTS else zone
+    zone_label = sc.WORDS[lang]["zones"].get(zone_key, zone_key)
+    dry_spell_pct = ZONE_FACTS[zone_key] if isinstance(ZONE_FACTS.get(zone_key), (int, float, str)) else ZONE_FACTS[zone_key][1 if lang == "kn" else 0]
     if lang == "kn":
         nasa_fact_text = f"🛰️ <strong>ನಾಸಾ POWER 1981–2025</strong> (ಮಾದರಿ ಅಂದಾಜು, {zone_label} ವಲಯ): ಜುಲೈ–ಆಗಸ್ಟ್‌ನಲ್ಲಿ 7+ ದಿನಗಳ ಒಣ ಅವಧಿ <strong>{dry_spell_pct}%</strong> ವರ್ಷಗಳಲ್ಲಿ ಸಂಭವಿಸಿದೆ."
     else:
-        nasa_fact_text = f"🛰️ <strong>NASA POWER 1981–2025</strong> (model estimate, {zone} zone): a dry spell of 7+ days in July–August happened in <strong>{dry_spell_pct}%</strong> of years."
+        nasa_fact_text = f"🛰️ <strong>NASA POWER 1981–2025</strong> (model estimate, {zone_key} zone): a dry spell of 7+ days in July–August happened in <strong>{dry_spell_pct}%</strong> of years."
 
     st.markdown(clean_html(f"""
     <div style="
@@ -1472,9 +1513,10 @@ def main():
     # ── FORM ──
     elif page == "form":
         # Back to home
-        if st.button("← " + ("Home" if lang == "en" else "ಮುಖಪುಟ"), key=f"back_home_{v}"):
+        if st.button("← " + ("Home" if lang == "en" else "ಮುಖಪುಟ"), type="primary", key=f"back_home_{v}"):
             st.session_state["page"] = "home"
             st.session_state.pop("go", None)
+            st.session_state.pop("inputs", None)
             st.rerun()
 
         inputs, submitted = render_form(lang, i, t)
@@ -1489,9 +1531,10 @@ def main():
 
             # New recommendation button
             st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
-            if st.button(t("back_to_top"), use_container_width=True, key=f"new_rec_{v}"):
+            if st.button(t("back_to_top"), type="primary", use_container_width=True, key=f"new_rec_{v}"):
                 st.session_state.pop("go", None)
                 st.session_state.pop("inputs", None)
+                st.session_state.pop("irrigation", None)
                 st.rerun()
 
     # ── Footer / Disclaimer ──
