@@ -1,28 +1,27 @@
-"""
-Field Shift - Crop Rotation Helper
-NASA Space Apps Challenge
-"""
+# app.py - Field Shift: Professional Agricultural Decision-Support Platform
+# Run with:  streamlit run app.py
+# It only CALLS scoring.py. It must never change a number or a weight.
 
-import re
 import streamlit as st
 import scoring as sc
-from scoring import TALUK_KN, SOIL_KN, PRIORITY, SEASON, ZONE_FACTS
+import re
 
 st.set_page_config(
     page_title="Field Shift — Crop Rotation Helper",
-    page_icon="🌱",
+    page_icon="🌾",
     layout="centered",
     initial_sidebar_state="collapsed",
 )
 
 # =====================================================================
-# CSS Design System — Field Shift
-# Warm off-white canvas, forest-green accents, card-based layouts
+# CUSTOM CSS — Professional mobile-first design
 # =====================================================================
-st.markdown(
-    """
+st.markdown("""
 <style>
-/* ── Color System: Variables ── */
+/* ── Import Noto Sans Kannada for proper rendering ── */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ── Root variables ── */
 :root {
     --forest-green:       #2A5C2A;
     --forest-green-dark:  #1B3D1B;
@@ -49,41 +48,35 @@ st.markdown(
     --info-border:        #3A87CC;
     --shadow-xs:          0 1px 2px rgba(0,0,0,0.05);
     --shadow-sm:          0 2px 6px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md:          0 4px 14px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-    --shadow-lg:          0 8px 24px rgba(0,0,0,0.10), 0 3px 8px rgba(0,0,0,0.05);
-    --shadow-green:       0 4px 16px rgba(42,92,42,0.22);
+    --shadow-md:          0 4px 16px rgba(0,0,0,0.09), 0 2px 5px rgba(0,0,0,0.05);
+    --shadow-lg:          0 12px 32px rgba(0,0,0,0.11), 0 4px 10px rgba(0,0,0,0.05);
+    --shadow-green:       0 6px 20px rgba(42,92,42,0.22);
     --radius-sm:          8px;
-    --radius-md:          12px;
-    --radius-lg:          16px;
-    --radius-xl:          20px;
-    --transition:         all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    --radius-md:          14px;
+    --radius-lg:          18px;
+    --radius-xl:          24px;
+    --transition:         all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── App canvas background ── */
+/* ── Global body & scrollbar ── */
 .stApp {
     background-color: var(--warm-white) !important;
+    font-family: 'Inter', 'Noto Sans Kannada', sans-serif !important;
 }
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--warm-white); }
-::-webkit-scrollbar-thumb {
-    background: var(--sage-light);
-    border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover { background: var(--sage-green); }
+::-webkit-scrollbar-thumb { background: var(--sage-pale); border-radius: 3px; }
 
-/* ── Hide Streamlit chrome ── */
-#MainMenu, header, footer,
-[data-testid="stToolbar"],
-[data-testid="stDecoration"],
-[data-testid="stStatusWidget"],
-div[data-testid="stReportProgress"] {
-    display: none !important;
-    visibility: hidden !important;
+/* Hide default Streamlit chrome */
+header[data-testid="stHeader"] {
+    background: transparent !important;
+    height: 0px !important;
+    min-height: 0px !important;
 }
+footer { display: none !important; }
+#MainMenu { display: none !important; }
 
-/* ── Page container constraints ── */
+/* ── Main container ── */
 .block-container {
     max-width: 740px !important;
     padding: 0.5rem 1.1rem 4rem 1.1rem !important;
@@ -244,6 +237,7 @@ div[data-testid="stSelectbox"] label {
 }
 
 /* ── Selected value text inside closed selectbox ── */
+/* Streamlit 1.40+ / 1.66 renders selected values inside an <input> (React-Aria combobox) */
 div[data-testid="stSelectbox"] input,
 div[data-testid="stSelectbox"] input.react-aria-Input,
 div[data-testid="stSelectbox"] input[type="text"] {
@@ -285,6 +279,7 @@ div[data-testid="stSelectbox"] svg {
 }
 
 /* ── Dropdown open menu (Floating popover) ── */
+/* Popover container */
 [data-testid="stSelectboxVirtualDropdown"],
 div[data-testid="stSelectboxVirtualDropdown"],
 ul[data-testid="stSelectboxVirtualDropdown"],
@@ -623,150 +618,180 @@ small, .stTextInput .instructions {
     h3 { font-size: 1.1rem !important; }
 
     div[data-testid="stSelectbox"] > div > div {
-        min-height: 44px !important;
+        min-height: 54px !important;
+        font-size: 1.05rem !important;
+    }
+
+    div[data-testid="stSelectbox"] input,
+    div[data-testid="stSelectbox"] input.react-aria-Input,
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] span {
+        font-size: 1.05rem !important;
+        color: #245B32 !important;
+        -webkit-text-fill-color: #245B32 !important;
     }
 
     button[kind="primary"],
     .stButton > button[kind="primary"] {
-        padding: 0.75rem 1.5rem !important;
-        font-size: 1rem !important;
-        min-height: 48px !important;
+        min-height: 58px !important;
+        font-size: 1.15rem !important;
     }
 
-    div[data-testid="stRadio"] label {
-        padding: 0.35rem 0.8rem !important;
-        font-size: 0.87rem !important;
+    .stButton > button {
+        min-height: 50px !important;
+    }
+
+    [data-testid="stExpander"] details > summary,
+    [data-testid="stExpander"] summary,
+    details > summary {
+        padding: 0.85rem 1rem !important;
+        font-size: 0.92rem !important;
+        min-height: 48px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .block-container {
+        padding: 0.1rem 0.5rem 2rem 0.5rem !important;
+    }
+    button[kind="primary"],
+    .stButton > button[kind="primary"] {
+        min-height: 60px !important;
+        font-size: 1.2rem !important;
+        border-radius: 12px !important;
     }
 }
 </style>
-""",
-    unsafe_allow_html=True,
-)
+""", unsafe_allow_html=True)
 
 # =====================================================================
-# UI Text Translations (T dictionary)
+# TRANSLATIONS
 # =====================================================================
 T = {
-    # Landing page
-    "hero_title": ("Field Shift", "ಫೀಲ್ಡ್ ಶಿಫ್ಟ್"),
-    "hero_subtitle": (
-        "Smart crop rotation suggestions based on your soil, season, and NASA satellite weather data.",
-        "ನಿಮ್ಮ ಮಣ್ಣು, ಋತು ಮತ್ತು ನಾಸಾ ಉಪಗ್ರಹ ಹವಾಮಾನ ಮಾಹಿತಿಯ ಆಧಾರದ ಮೇಲೆ ಸೂಕ್ತ ಬೆಳೆ ಸರದಿ ಸಲಹೆಗಳು.",
-    ),
-    "how_title": ("How it works", "ಇದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ"),
-    "how_1": (
-        "Tell us your location, soil type, and current season",
-        "ನಿಮ್ಮ ತಾಲೂಕು, ಮಣ್ಣಿನ ಪ್ರಕಾರ ಮತ್ತು ಋತುವನ್ನು ತಿಳಿಸಿ",
-    ),
-    "how_2": (
-        "Share what you grew last so we can protect your soil",
-        "ಮಣ್ಣಿನ ರಕ್ಷಣೆಗಾಗಿ ಈ ಹಿಂದೆ ಬೆಳೆದ ಬೆಳೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
-    ),
-    "how_3": (
-        "Get 3 scored alternatives ranked for your field's conditions",
-        "ನಿಮ್ಮ ಜಮೀನಿನ ಸ್ಥಿತಿಗೆ ಸೂಕ್ತವಾದ 3 ಪರ್ಯಾಯ ಬೆಳೆಗಳ ಅಂಕಗಳನ್ನು ಪಡೆಯಿರಿ",
-    ),
-    "benefits_title": ("Benefits for farmers", "ರೈತರಿಗೆ ಪ್ರಯೋಜನಗಳು"),
-    "ben_1": (
-        "Break pest and disease cycles naturally",
-        "ಕೀಟ ಮತ್ತು ರೋಗ ಬಾಧೆಯನ್ನು ನೈಸರ್ಗಿಕವಾಗಿ ನಿಯಂತ್ರಿಸಿ",
-    ),
-    "ben_2": (
-        "Replenish soil nitrogen with legume rotations",
-        "ದ್ವಿದಳ ಧಾನ್ಯಗಳ ಸರದಿಯಿಂದ ಮಣ್ಣಿನ ಸಾರಜನಕ ಹೆಚ್ಚಿಸಿ",
-    ),
-    "ben_3": (
-        "Match crop water demand to seasonal rainfall patterns",
-        "ಮಳೆಗಾಲದ ಲಭ್ಯ ನೀರಿಗೆ ತಕ್ಕಂತೆ ಸೂಕ್ತ ಬೆಳೆಗಳನ್ನು ಆರಿಸಿ",
-    ),
-    "ben_4": (
-        "Compare trade-offs between income stability and resource conservation",
-        "ಆದಾಯ ಭದ್ರತೆ ಮತ್ತು ಸಂಪನ್ಮೂಲ ಸಂರಕ್ಷಣೆಯ ನಡುವಿನ ಸಮತೋಲನ ಪರಿಶೀಲಿಸಿ",
-    ),
-    "nasa_title": ("Powered by NASA satellite data", "ನಾಸಾ ಮಾಹಿತಿಯಿಂದ ಚಾಲಿತ"),
-    "nasa_desc": (
-        "Uses 30-year historical climate patterns from NASA POWER satellite observations "
-        "(rainfall volume, dry spell risks, and monsoon intensity) calibrated for Belagavi district.",
-        "ಬೆಳಗಾವಿ ಜಿಲ್ಲೆಗೆ ಅನ್ವಯಿಸಲಾದ ನಾಸಾ POWER ಉಪಗ್ರಹದ 30 ವರ್ಷಗಳ ಹವಾಮಾನ ಅಧ್ಯಯನ "
-        "(ಮಳೆ ಪ್ರಮಾಣ, ಒಣ ಹವೆಯ ದಿನಗಳು ಮತ್ತು ಮುಂಗಾರಿನ ತೀವ್ರತೆ) ಆಧಾರಿತವಾಗಿದೆ.",
-    ),
-    "start_btn": ("Start Recommendation", "ಶಿಫಾರಸು ಪ್ರಾರಂಭಿಸಿ"),
-    # Form labels
+    "title": ("Field Shift: crop rotation helper", "ಫೀಲ್ಡ್ ಶಿಫ್ಟ್: ಬೆಳೆ ಪರ್ಯಾಯ ಸಹಾಯಕ"),
+    "language": ("Language", "ಭಾಷೆ"),
     "details": ("Your details", "ನಿಮ್ಮ ವಿವರಗಳು"),
-    "taluk": ("Taluk (Belagavi district)", "ತಾಲೂಕು (ಬೆಳಗಾವಿ ಜಿಲ್ಲೆ)"),
-    "soil": ("Soil type", "ಮಣ್ಣಿನ ಪ್ರಕಾರ"),
-    "season": ("Season you are planning for", "ಯಾವ ಋತುವಿಗಾಗಿ ಯೋಜನೆ?"),
-    "last": ("Crop you just harvested", "ಈಗಷ್ಟೇ ಕೊಯ್ಲು ಮಾಡಿದ ಬೆಳೆ"),
-    "prev": (
-        "Crop before that (optional, helps check 3-crop patterns)",
-        "ಅದಕ್ಕಿಂತ ಹಿಂದಿನ ಬೆಳೆ (ಐಚ್ಛಿಕ, 3-ಬೆಳೆ ಸರದಿ ಪರಿಶೀಲನೆಗಾಗಿ)",
-    ),
-    "irrigation": ("Do you have irrigation?", "ನೀರಾವರಿ ಇದೆಯೇ?"),
-    "irr_no": (
-        "I do not (rainfed only)",
-        "ಇಲ್ಲ (ಕೇವಲ ಮಳೆ ಆಶ್ರಿತ)",
-    ),
-    "irr_yes": (
-        "I have irrigation (borewell, canal, etc.)",
-        "ಹೌದು, ನೀರಾವರಿ ಇದೆ (ಬೋರ್‌ವೆಲ್, ಕಾಲುವೆ, ಇತ್ಯಾದಿ)",
-    ),
-    "priority": ("What matters most this season?", "ಈ ಋತುವಿನಲ್ಲಿ ನಿಮ್ಮ ಮುಖ್ಯ ಆದ್ಯತೆ ಏನು?"),
-    "usual": (
-        "Your usual next crop (optional)",
-        "ನೀವು ಸಾಮಾನ್ಯವಾಗಿ ಬೆಳೆಯುವ ಬೆಳೆ (ಐಚ್ಛಿಕ)",
-    ),
-    "usual_help": (
-        "If you already have a crop in mind, select it here. Field Shift will show your choice alongside two alternatives.",
-        "ನಿಮ್ಮ ಮನಸ್ಸಿನಲ್ಲಿ ಈಗಾಗಲೇ ಒಂದು ಬೆಳೆ ಇದ್ದರೆ, ಅದನ್ನು ಇಲ್ಲಿ ಆಯ್ಕೆಮಾಡಿ. ಫೀಲ್ಡ್ ಶಿಫ್ಟ್ ನಿಮ್ಮ ಆಯ್ಕೆಯೊಂದಿಗೆ ಎರಡು ಪರ್ಯಾಯಗಳನ್ನು ತೋರಿಸುತ್ತದೆ.",
-    ),
-    "go": ("Get my suggestion", "ಸಲಹೆ ಪಡೆಯಿರಿ"),
-    "back": ("← Change inputs", "← ವಿವರ ಬದಲಾಯಿಸಿ"),
-    # Form section headers
-    "form_location": ("Location & Soil", "ಸ್ಥಳ ಮತ್ತು ಮಣ್ಣು"),
-    "form_season_crop": ("Season & Comparison", "ಋತು ಮತ್ತು ಹೋಲಿಕೆ"),
-    "form_crop_history": ("Crop History", "ಬೆಳೆ ಇತಿಹಾಸ"),
-    "form_preferences": ("Your Preferences", "ನಿಮ್ಮ ಆದ್ಯತೆಗಳು"),
-    # Results
-    "results_title": ("Your Recommendations", "ನಿಮ್ಮ ಶಿಫಾರಸುಗಳು"),
-    "for_conditions": ("For conditions:", "ಈ ಸ್ಥಿತಿಗೆ:"),
+    "taluk": ("Taluk", "ತಾಲೂಕು"),
+    "soil": ("Soil", "ಮಣ್ಣು"),
+    "season": ("Season you are planning", "ನೀವು ಯೋಜಿಸುತ್ತಿರುವ ಋತು"),
+    "last": ("Last crop", "ಹಿಂದಿನ ಬೆಳೆ"),
+    "prev": ("Crop before that (optional)", "ಅದಕ್ಕೂ ಮೊದಲಿನ ಬೆಳೆ (ಐಚ್ಛಿಕ)"),
+    "irr": ("Do you have irrigation?", "ನೀರಾವರಿ ಇದೆಯೇ?"),
+    "pri": ("What matters most?", "ಯಾವುದು ಮುಖ್ಯ?"),
+    "go": ("Get suggestion", "ಸಲಹೆ ಪಡೆಯಿರಿ"),
+    "best": ("Best choices for you", "ನಿಮಗೆ ಉತ್ತಮ ಆಯ್ಕೆಗಳು"),
+    "score": ("Score", "ಅಂಕ"),
+    "rotation": ("Crop rotation", "ಬೆಳೆ ಪರ್ಯಾಯ"),
+    "soilw": ("Soil", "ಮಣ್ಣು"),
+    "climate": ("Weather and climate", "ಹವಾಮಾನ"),
+    "water": ("Water use", "ನೀರಿನ ಬಳಕೆ"),
     "warning": ("Warning", "ಎಚ್ಚರಿಕೆ"),
-    "top_choice": ("Top choice", "ಅತ್ಯುತ್ತಮ ಆಯ್ಕೆ"),
     "equal": ("Equal choice", "ಸಮಾನ ಆಯ್ಕೆ"),
     "place": ("Place", "ಸ್ಥಾನ"),
-    "rotation": ("Rotation fit", "ಬೆಳೆ ಸರದಿ ಹೊಂದಾಣಿಕೆ"),
-    "soilw": ("Soil fit", "ಮಣ್ಣಿನ ಹೊಂದಾಣಿಕೆ"),
-    "climate": ("Climate fit", "ಹವಾಮಾನ ಹೊಂದಾಣಿಕೆ"),
-    "water": ("Water use", "ನೀರಿನ ಬಳಕೆ"),
-    "nasa_insight": ("NASA Climate Insight", "ನಾಸಾ ಹವಾಮಾನ ಮಾಹಿತಿ"),
+    "yes": ("I have irrigation", "ನೀರಾವರಿ ಇದೆ"),
+    "no": ("I do not", "ಇಲ್ಲ"),
+    "disclaimer": (
+        "This is guidance based on NASA weather data and published research. It is not a guarantee. Please check with your agriculture office.",
+        "ಇದು ನಾಸಾ ಹವಾಮಾನ ಮಾಹಿತಿ ಮತ್ತು ಪ್ರಕಟಿತ ಸಂಶೋಧನೆಯ ಆಧಾರದ ಮಾರ್ಗದರ್ಶನ. ಇದು ಖಾತರಿ ಅಲ್ಲ. ದಯವಿಟ್ಟು ನಿಮ್ಮ ಕೃಷಿ ಕಚೇರಿಯಲ್ಲಿ ಪರಿಶೀಲಿಸಿ."),
+    # New keys for redesigned sections
+    "hero_subtitle": (
+        "Smart crop rotation advice powered by NASA climate data, local soil research and your priorities.",
+        "ನಾಸಾ ಹವಾಮಾನ ಮಾಹಿತಿ, ಸ್ಥಳೀಯ ಮಣ್ಣಿನ ಸಂಶೋಧನೆ ಮತ್ತು ನಿಮ್ಮ ಆದ್ಯತೆಗಳ ಆಧಾರದಲ್ಲಿ ಬೆಳೆ ಪರ್ಯಾಯ ಸಲಹೆ.",
+    ),
+    "start_btn": ("Start Recommendation", "ಶಿಫಾರಸು ಪ್ರಾರಂಭಿಸಿ"),
+    "how_title": ("How it works", "ಇದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ"),
+    "how_1": ("You share your field details", "ನಿಮ್ಮ ಹೊಲದ ವಿವರಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಿ"),
+    "how_2": ("We analyse NASA climate data and research", "ನಾಸಾ ಹವಾಮಾನ ಮಾಹಿತಿ ಮತ್ತು ಸಂಶೋಧನೆಯನ್ನು ವಿಶ್ಲೇಷಿಸುತ್ತೇವೆ"),
+    "how_3": ("You get scored crop suggestions", "ಅಂಕ ನೀಡಿದ ಬೆಳೆ ಸಲಹೆಗಳನ್ನು ಪಡೆಯಿರಿ"),
+    "benefits_title": ("Benefits for farmers", "ರೈತರಿಗೆ ಪ್ರಯೋಜನಗಳು"),
+    "ben_1": ("Improve soil health through smart rotation", "ಬುದ್ಧಿವಂತ ಪರ್ಯಾಯದ ಮೂಲಕ ಮಣ್ಣಿನ ಆರೋಗ್ಯ ಸುಧಾರಿಸಿ"),
+    "ben_2": ("Save water with the right crop choice", "ಸರಿಯಾದ ಬೆಳೆ ಆಯ್ಕೆಯಿಂದ ನೀರು ಉಳಿಸಿ"),
+    "ben_3": ("Reduce harvest risk using climate data", "ಹವಾಮಾನ ಮಾಹಿತಿ ಬಳಸಿ ಫಸಲು ಅಪಾಯ ಕಡಿಮೆ ಮಾಡಿ"),
+    "ben_4": ("Evidence-based decisions backed by research", "ಸಂಶೋಧನೆಯ ಆಧಾರದ ನಿರ್ಧಾರಗಳು"),
+    "nasa_title": ("Powered by NASA data", "ನಾಸಾ ಮಾಹಿತಿಯಿಂದ ಚಾಲಿತ"),
+    "nasa_desc": (
+        "Field Shift uses NASA POWER climate data (a model estimate) spanning 1981-2025 — including rainfall patterns, dry spell risks and soil moisture estimates — combined with published agricultural research from the University of Agricultural Sciences, Dharwad and ICAR to provide evidence-based crop rotation advice for Belagavi district.",
+        "ಫೀಲ್ಡ್ ಶಿಫ್ಟ್ 1981-2025ರ ನಾಸಾ POWER ಹವಾಮಾನ ಮಾಹಿತಿಯನ್ನು (ಮಾದರಿ ಅಂದಾಜು) — ಮಳೆ ಮಾದರಿಗಳು, ಒಣ ಅವಧಿಯ ಅಪಾಯಗಳು ಮತ್ತು ಮಣ್ಣಿನ ತೇವಾಂಶ ಅಂದಾಜುಗಳನ್ನು — ಧಾರವಾಡದ ಕೃಷಿ ವಿಶ್ವವಿದ್ಯಾಲಯ ಮತ್ತು ಐಸಿಎಆರ್‌ನ ಪ್ರಕಟಿತ ಕೃಷಿ ಸಂಶೋಧನೆಯೊಂದಿಗೆ ಸಂಯೋಜಿಸಿ ಬೆಳಗಾವಿ ಜಿಲ್ಲೆಗೆ ಆಧಾರಿತ ಬೆಳೆ ಪರ್ಯಾಯ ಸಲಹೆ ನೀಡುತ್ತದೆ.",
+    ),
+    "form_location": ("Location & Soil", "ಸ್ಥಳ ಮತ್ತು ಮಣ್ಣು"),
+    "form_crop_history": ("Crop History", "ಬೆಳೆ ಇತಿಹಾಸ"),
+    "form_preferences": ("Your Preferences", "ನಿಮ್ಮ ಆದ್ಯತೆಗಳು"),
+    "form_season_crop": ("Season & Comparison", "ಋತು ಮತ್ತು ಹೋಲಿಕೆ"),
+    "usual_crop": (
+        "Your usual crop for this season (for comparison)",
+        "ಈ ಋತುವಿನಲ್ಲಿ ನೀವು ಸಾಮಾನ್ಯವಾಗಿ ಬೆಳೆಯುವ ಬೆಳೆ (ಹೋಲಿಕೆಗಾಗಿ)",
+    ),
+    "results_title": ("Your Recommendations", "ನಿಮ್ಮ ಶಿಫಾರಸುಗಳು"),
+    "score_breakdown": ("Score Breakdown", "ಅಂಕಗಳ ವಿವರ"),
     "strategies_title": ("Compare 3 strategies", "3 ತಂತ್ರಗಳನ್ನು ಹೋಲಿಸಿ"),
     "strategies_note": ("", ""),
-    "strat_usual": ("Your usual choice", "ನಿಮ್ಮ ಸಾಮಾನ್ಯ ಆಯ್ಕೆ"),
-    "strat_alt1": ("Alternative 1", "ಪರ್ಯಾಯ 1"),
-    "strat_alt2": ("Alternative 2", "ಪರ್ಯಾಯ 2"),
-    "strat_alt3": ("Alternative 3", "ಪರ್ಯಾಯ 3"),
     "why_suggested": ("Why suggested", "ಏಕೆ ಶಿಫಾರಸು ಮಾಡಲಾಗಿದೆ"),
     "evidence": ("Evidence", "ಸಾಕ್ಷ್ಯ"),
     "benefits": ("Benefits", "ಪ್ರಯೋಜನಗಳು"),
     "info_gaps": ("Information gaps", "ಮಾಹಿತಿ ಕೊರತೆಗಳು"),
-    "risks": ("Risks to watch", "ಗಮನಿಸಬೇಕಾದ ಅಪಾಯಗಳು"),
-    "assumption_title": (
-        "If our water assumption is wrong",
-        "ನಮ್ಮ ನೀರಿನ ಊಹೆ ತಪ್ಪಾಗಿದ್ದರೆ",
-    ),
-    "disclaimer_text": (
-        "Field Shift is a decision-support prototype built for the NASA Space Apps Challenge. "
-        "Recommendations combine agronomic rotation logic with NASA satellite climate data. "
-        "Always confirm with your local Raitha Samparka Kendra or agriculture officer before purchasing seeds.",
-        "ಫೀಲ್ಡ್ ಶಿಫ್ಟ್ ಎಂಬುದು ನಾಸಾ ಸ್ಪೇಸ್ ಆಪ್ಸ್ ಚಾಲೆಂಜ್‌ಗಾಗಿ ರೂಪಿಸಲಾದ ಒಂದು ಮಾದರಿ ತಂತ್ರಾಂಶವಾಗಿದೆ. "
-        "ಶಿಫಾರಸುಗಳು ಕೃಷಿ ವಿಜ್ಞಾನದ ತತ್ವಗಳು ಮತ್ತು ನಾಸಾ ಉಪಗ್ರಹ ಹವಾಮಾನ ಮಾಹಿತಿಯನ್ನು ಆಧರಿಸಿವೆ. "
-        "ಬೀಜ ಖರೀದಿಸುವ ಮುನ್ನ ಯಾವಾಗಲೂ ನಿಮ್ಮ ಸ್ಥಳೀಯ ರೈತ ಸಂಪರ್ಕ ಕೇಂದ್ರ ಅಥವಾ ಕೃಷಿ ಅಧಿಕಾರಿಯೊಂದಿಗೆ ಸಮಾಲೋಚಿಸಿ.",
-    ),
+    "risks": ("Risks", "ಅಪಾಯಗಳು"),
+    "assumption_title": ("If our water assumption is wrong", "ನಮ್ಮ ನೀರಿನ ಊಹೆ ತಪ್ಪಾಗಿದ್ದರೆ"),
     "back_to_top": ("New recommendation", "ಹೊಸ ಶಿಫಾರಸು"),
 }
 
+from scoring import ZONE_FACTS, TALUK_KN, SOIL_KN, PRIORITY, SEASON
+
 
 # =====================================================================
-# Helper Functions
+# HELPER: Language setup
+# =====================================================================
+def setup_language():
+    """Returns (lang_code, index, translator_fn)."""
+    if "lang_version" not in st.session_state:
+        st.session_state["lang_version"] = 0
+    if "current_lang" not in st.session_state:
+        q_lang = st.query_params.get("lang")
+        st.session_state["current_lang"] = q_lang if q_lang in ("kn", "en") else "kn"
+
+    choice = st.radio(
+        "Language / ಭಾಷೆ",
+        ["ಕನ್ನಡ", "English"],
+        index=0 if st.session_state["current_lang"] == "kn" else 1,
+        horizontal=True,
+        key="lang_choice",
+    )
+    new_lang = "kn" if choice == "ಕನ್ನಡ" else "en"
+
+    # Immediately detect language switch, increment version, copy state, and rerun
+    if new_lang != st.session_state["current_lang"]:
+        old_v = st.session_state["lang_version"]
+        new_v = old_v + 1
+        st.session_state["lang_version"] = new_v
+        st.session_state["current_lang"] = new_lang
+
+        widget_prefixes = [
+            "taluk_input",
+            "soil_input",
+            "season_input",
+            "last_crop_input",
+            "prev_crop_input",
+            "irrigation_input",
+            "priority_input",
+            "usual_crop_input",
+        ]
+        for pfx in widget_prefixes:
+            old_k = f"{pfx}_{old_v}"
+            new_k = f"{pfx}_{new_v}"
+            if old_k in st.session_state:
+                st.session_state[new_k] = st.session_state[old_k]
+
+        st.rerun()
+
+    lang = st.session_state["current_lang"]
+    idx = 0 if lang == "en" else 1
+
+    def t(k):
+        return T[k][idx]
+
+    return lang, idx, t
+
+
+# =====================================================================
+# HELPER: HTML cleaner & Score bar HTML
 # =====================================================================
 def clean_html(html_str):
     """Strip HTML comments and leading indentation so markdown never parses HTML as code blocks."""
@@ -785,78 +810,73 @@ def score_bar_html(score, max_score, label, detail):
         score_color = "#2A5C2A"
     elif pct >= 50:
         bar_color = "#6B8F5E"
-        bar_bg = "rgba(107,143,94,0.14)"
+        bar_bg = "rgba(107,143,94,0.12)"
         score_color = "#4A6E3D"
     elif pct >= 25:
-        bar_color = "#C49A00"
-        bar_bg = "rgba(196,154,0,0.14)"
-        score_color = "#8A6A00"
+        bar_color = "#B8880A"
+        bar_bg = "rgba(184,136,10,0.10)"
+        score_color = "#8A6300"
     else:
-        bar_color = "#C05621"
-        bar_bg = "rgba(192,86,33,0.14)"
-        score_color = "#C05621"
+        bar_color = "#A83820"
+        bar_bg = "rgba(168,56,32,0.10)"
+        score_color = "#A83820"
 
     return clean_html(f"""
-<div style="margin-bottom: 0.65rem;">
-<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px;">
-<span style="font-size: 0.83rem; font-weight: 600; color: #182818; font-family: 'Inter', 'Noto Sans Kannada', sans-serif;">{label}</span>
+<div style="margin-bottom: 13px;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+<span style="font-weight: 600; font-size: 0.84rem; color: #182818; font-family: 'Inter', 'Noto Sans Kannada', sans-serif; letter-spacing: 0.01em;">{label}</span>
 <span style="font-size: 0.82rem; color: {score_color}; font-weight: 700; font-family: 'Inter', sans-serif; background: {bar_bg}; padding: 1px 7px; border-radius: 20px; white-space: nowrap;">{score}/{max_score}</span>
 </div>
 <div style="background: #EAF0E5; border-radius: 100px; height: 7px; overflow: hidden; margin-bottom: 5px;">
 <div style="width: {pct}%; height: 100%; background: linear-gradient(90deg, {bar_color}CC, {bar_color}); border-radius: 100px;"></div>
 </div>
-<div style="font-size: 0.77rem; color: #62786A; line-height: 1.45; font-family: 'Inter', 'Noto Sans Kannada', sans-serif; padding-left: 2px;">{detail}</div>
+<div style="font-size: 0.77rem; color: #62786A; line-height: 1.45; font-family: 'Inter', 'Noto Sans Kannada', sans-serif; padding-left: 1px;">{detail}</div>
 </div>
 """)
 
 
-def crop_card_html(x, is_top, rank_num, t_fn, lang):
+# =====================================================================
+# HELPER: Crop card HTML
+# =====================================================================
+def render_crop_card(x, lang, t_fn, is_top=False):
     """Render a recommendation card for a crop."""
-    crop_name = x["name_kn"] if lang == "kn" else sc.crop_word(lang, x["crop"])
+    badge_text = t_fn("equal") if x["tied"] else f"{t_fn('place')} {x['place']}"
+    crop_name = sc.crop_word(lang, x["crop"])
     total = x["total"]
     max_total = x["max_total"]
+    pct = int((total / max_total) * 100) if max_total > 0 else 0
 
-    # Visual hierarchy: top crop vs runners-up
-    if is_top and not x["tied"]:
-        badge_text = t_fn("top_choice")
-        badge_bg = "linear-gradient(135deg, #1B3D1B, #2A5C2A)"
+    # Badge & border colors
+    if x["place"] == 1:
+        badge_bg = "#2A5C2A"
         badge_fg = "#FFFFFF"
         border_color = "#2A5C2A"
-        card_accent = "linear-gradient(180deg, rgba(235,243,230,0.4) 0%, rgba(255,255,255,0) 100%)"
-        ring_color = "#2A5C2A"
-        ring_track = "#EBF3E6"
-    elif x["tied"]:
-        badge_text = t_fn("equal")
+        card_accent = "linear-gradient(180deg, rgba(42,92,42,0.06) 0%, transparent 50%)"
+    elif x["place"] == 2:
         badge_bg = "#6B8F5E"
         badge_fg = "#FFFFFF"
         border_color = "#6B8F5E"
-        card_accent = "linear-gradient(180deg, rgba(245,249,243,0.35) 0%, rgba(255,255,255,0) 100%)"
-        ring_color = "#4A6E3D"
-        ring_track = "#F0F6EC"
+        card_accent = "linear-gradient(180deg, rgba(107,143,94,0.05) 0%, transparent 50%)"
     else:
-        badge_text = f"{t_fn('place')} {rank_num}"
         badge_bg = "#9BBD8D"
         badge_fg = "#182818"
         border_color = "#9BBD8D"
-        card_accent = "none"
-        ring_color = "#6B8F5E"
-        ring_track = "#F5F8F3"
-
-    pct = int((total / max_total) * 100) if max_total > 0 else 0
-    if pct >= 80:
-        ring_color = "#2A5C2A"
-        ring_track = "rgba(42,92,42,0.12)"
-    elif pct >= 65:
-        ring_color = "#4A6E3D"
-        ring_track = "rgba(74,110,61,0.12)"
-    else:
-        ring_color = "#6B8F5E"
-        ring_track = "rgba(107,143,94,0.12)"
+        card_accent = "linear-gradient(180deg, rgba(155,189,141,0.04) 0%, transparent 50%)"
 
     if x["tied"]:
-        badge_bg = "linear-gradient(135deg, #B8880A, #D4A017)"
+        badge_bg = "#C49A00"
         badge_fg = "#FFFFFF"
-        border_color = "#D4A017"
+        border_color = "#C49A00"
+        card_accent = "linear-gradient(180deg, rgba(196,154,0,0.05) 0%, transparent 50%)"
+
+    # Score ring color
+    if pct >= 75:
+        ring_color = "#2A5C2A"
+        ring_track = "rgba(42,92,42,0.15)"
+    elif pct >= 50:
+        ring_color = "#6B8F5E"
+        ring_track = "rgba(107,143,94,0.15)"
+    else:
         ring_color = "#B8880A"
         ring_track = "rgba(184,136,10,0.12)"
 
@@ -1137,33 +1157,52 @@ def render_form(lang, i, t_fn):
     irrigation_key = f"irrigation_input_{v}"
 
     irrigation = st.radio(
-        t_fn("irrigation"),
+        t_fn("irr"),
         [True, False],
+        horizontal=True,
+        format_func=lambda x: t_fn("yes") if x else t_fn("no"),
         index=1,
-        format_func=lambda x: t_fn("irr_yes") if x else t_fn("irr_no"),
         key=irrigation_key,
     )
-
     priority = st.radio(
-        t_fn("priority"),
+        t_fn("pri"),
         list(PRIORITY),
         format_func=lambda x: PRIORITY[x][i],
         key=f"priority_input_{v}",
     )
 
-    # ── Strategy comparison: usual crop ──
-    season_crops = [
-        c for c, val in sc.crop_info.items() if val["season"] == season
-    ]
-    usual_crop = st.selectbox(
-        t_fn("usual"),
-        ["Select"] + season_crops,
+    # Usual crop for comparison
+    season_crops = [c for c, val in sc.crop_info.items() if val["season"] == season]
+    usual_key = f"usual_crop_input_{v}"
+    usual_options = ["Select"] + season_crops
+    if usual_key in st.session_state and st.session_state[usual_key] not in usual_options:
+        st.session_state[usual_key] = "Select"
+
+    usual = st.selectbox(
+        t_fn("usual_crop"),
+        usual_options,
+        index=0,
         format_func=lambda c: "Select" if c == "Select" else sc.crop_word(lang, c),
-        help=t_fn("usual_help"),
-        key=f"usual_crop_input_{v}",
+        key=usual_key,
     )
 
-    inputs = {
+    # Bottom cap of form card
+    st.markdown("""
+    <div style="
+        background: #F8F6F1;
+        border-radius: 0 0 16px 16px;
+        padding: 0.8rem 1.4rem 1rem 1.4rem;
+        border: 1.5px solid #DDE8D7;
+        border-top: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        margin-bottom: 1rem;
+    ">
+    </div>
+    """, unsafe_allow_html=True)
+
+    submitted = st.button(t_fn("go"), type="primary", use_container_width=True, key=f"go_btn_{v}")
+
+    return {
         "taluk": taluk,
         "soil": soil,
         "season": season,
@@ -1171,14 +1210,8 @@ def render_form(lang, i, t_fn):
         "prev_crop": prev_crop,
         "irrigation": irrigation,
         "priority": priority,
-        "usual": usual_crop if usual_crop != "Select" else None,
-    }
-
-    # Submit button
-    st.markdown("<div style='height: 0.8rem;'></div>", unsafe_allow_html=True)
-    submitted = st.button(t_fn("go"), type="primary", use_container_width=True)
-
-    return inputs, submitted
+        "usual": usual,
+    }, submitted
 
 
 # =====================================================================
@@ -1242,37 +1275,6 @@ def render_results(inputs, lang, i, t_fn):
     </div>
     """), unsafe_allow_html=True)
 
-    # Condition chips
-    zone_label = f"Belagavi Zone ({zone})" if lang == "en" else f"ಬೆಳಗಾವಿ ವಲಯ ({zone})"
-    soil_display = SOIL_KN[inputs["soil"]] if lang == "kn" else inputs["soil"].capitalize()
-    season_display = SEASON[inputs["season"]][i]
-    irr_display = "Irrigated" if inputs["irrigation"] else "Rainfed"
-    if lang == "kn":
-        irr_display = "ನೀರಾವರಿ" if inputs["irrigation"] else "ಮಳೆ ಆಶ್ರಿತ"
-    last_crop_display = sc.crop_word(lang, inputs["last_crop"])
-
-    st.markdown(clean_html(f"""
-    <div style="
-        background: #FFFFFF;
-        border-radius: 12px;
-        padding: 0.85rem 1rem;
-        margin-bottom: 1.1rem;
-        border: 1.5px solid #DDE8D7;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.45rem;
-        align-items: center;
-    ">
-        <span style="font-size: 0.75rem; color: #62786A; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-right: 0.2rem;">{t_fn("for_conditions")}</span>
-        <span style="background: #EBF3E6; color: #2A5C2A; font-size: 0.8rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 100px;">📍 {inputs["taluk"]} · {zone_label}</span>
-        <span style="background: #EBF3E6; color: #2A5C2A; font-size: 0.8rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 100px;">🌱 {soil_display}</span>
-        <span style="background: #EBF3E6; color: #2A5C2A; font-size: 0.8rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 100px;">🗓️ {season_display}</span>
-        <span style="background: #EBF3E6; color: #2A5C2A; font-size: 0.8rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 100px;">💧 {irr_display}</span>
-        <span style="background: #EBF3E6; color: #2A5C2A; font-size: 0.8rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 100px;">🌾 Previous: {last_crop_display}</span>
-    </div>
-    """), unsafe_allow_html=True)
-
     # Warnings
     for w in r["warnings"]:
         st.markdown(clean_html(f"""
@@ -1294,25 +1296,30 @@ def render_results(inputs, lang, i, t_fn):
 
     # Crop cards
     for idx, x in enumerate(r["ranked"]):
-        card_html = crop_card_html(x, idx == 0, idx + 1, t_fn, lang)
+        card_html = render_crop_card(x, lang, t_fn, is_top=(idx == 0))
         st.markdown(card_html, unsafe_allow_html=True)
 
-    # NASA Climate Fact Box
-    nasa_fact_text = ZONE_FACTS[zone][i]
+    # NASA facts
+    zone_label = sc.WORDS[lang]["zones"].get(zone, zone)
+    dry_spell_pct = ZONE_FACTS[zone] if isinstance(ZONE_FACTS[zone], (int, float, str)) else ZONE_FACTS[zone][1 if lang == "kn" else 0]
+    if lang == "kn":
+        nasa_fact_text = f"🛰️ <strong>ನಾಸಾ POWER 1981–2025</strong> (ಮಾದರಿ ಅಂದಾಜು, {zone_label} ವಲಯ): ಜುಲೈ–ಆಗಸ್ಟ್‌ನಲ್ಲಿ 7+ ದಿನಗಳ ಒಣ ಅವಧಿ <strong>{dry_spell_pct}%</strong> ವರ್ಷಗಳಲ್ಲಿ ಸಂಭವಿಸಿದೆ."
+    else:
+        nasa_fact_text = f"🛰️ <strong>NASA POWER 1981–2025</strong> (model estimate, {zone} zone): a dry spell of 7+ days in July–August happened in <strong>{dry_spell_pct}%</strong> of years."
+
     st.markdown(clean_html(f"""
     <div style="
-        background: linear-gradient(135deg, #EBF3E6 0%, #F5F9F2 100%);
-        border-radius: 12px;
-        padding: 0.95rem 1.1rem;
-        margin: 1.1rem 0;
-        border: 1.5px solid #C8DFBC;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        font-size: 0.86rem;
-        color: #2A5C2A;
-        font-family: 'Inter', 'Noto Sans Kannada', sans-serif;
+        background: #E8F2FC;
+        border-left: 4px solid #3A87CC;
+        border-radius: 10px;
+        padding: 0.9rem 1.1rem;
+        margin: 0.9rem 0;
+        font-size: 0.87rem;
+        color: #1A3A5C;
         line-height: 1.55;
+        font-family: 'Inter', 'Noto Sans Kannada', sans-serif;
+        box-shadow: 0 1px 4px rgba(58,135,204,0.08);
     ">
-        <strong style="color: #1B3D1B;">🛰️ {t_fn("nasa_insight")} ({inputs["taluk"]} · {zone}):</strong><br/>
         {nasa_fact_text}
     </div>
     """), unsafe_allow_html=True)
@@ -1408,113 +1415,105 @@ def render_results(inputs, lang, i, t_fn):
                 background: #EBF5EC;
                 border-left: 4px solid #3D9A42;
                 border-radius: 10px;
-                padding: 0.85rem 1.1rem;
-                margin-bottom: 1rem;
+                padding: 0.9rem 1.1rem;
+                margin-bottom: 0.6rem;
                 font-size: 0.88rem;
-                color: #1B4D20;
-                font-family: 'Inter', 'Noto Sans Kannada', sans-serif;
+                color: #1F5E22;
                 line-height: 1.55;
+                font-family: 'Inter', 'Noto Sans Kannada', sans-serif;
+                box-shadow: 0 1px 4px rgba(61,154,66,0.08);
             ">
-                <strong>✓</strong> {ac_msg}
+                ✓ {ac_msg}
             </div>
             """), unsafe_allow_html=True)
         else:
             st.markdown(clean_html(f"""
             <div style="
                 background: #FFFBEE;
-                border-left: 4px solid #D4A017;
+                border-left: 4px solid #C49A00;
                 border-radius: 10px;
-                padding: 0.85rem 1.1rem;
-                margin-bottom: 1rem;
+                padding: 0.9rem 1.1rem;
+                margin-bottom: 0.6rem;
                 font-size: 0.88rem;
                 color: #6B4F00;
-                font-family: 'Inter', 'Noto Sans Kannada', sans-serif;
                 line-height: 1.55;
+                font-family: 'Inter', 'Noto Sans Kannada', sans-serif;
+                box-shadow: 0 1px 4px rgba(196,154,0,0.10);
             ">
-                <strong>⚠</strong> {ac_msg}
+                ⚠ {ac_msg}
             </div>
             """), unsafe_allow_html=True)
 
 
 # =====================================================================
-# Main Application Flow
+# MAIN APPLICATION
 # =====================================================================
 def main():
-    # ── Language selector ──
-    lang_param = st.query_params.get("lang", None)
-    default_lang_idx = 1 if lang_param == "kn" else 0
+    # Language selector
+    lang, i, t = setup_language()
+    v = st.session_state.get("lang_version", 0)
 
-    lang_choice = st.radio(
-        "Language / ಭಾಷೆ",
-        ["English", "ಕನ್ನಡ"],
-        index=default_lang_idx,
-        horizontal=True,
-        label_visibility="collapsed",
-    )
-    lang = "kn" if lang_choice == "ಕನ್ನಡ" else "en"
-    i = 1 if lang == "kn" else 0
+    # Navigation state
+    if "page" not in st.session_state:
+        q_page = st.query_params.get("page")
+        st.session_state["page"] = q_page if q_page in ("home", "form") else "home"
+    if st.query_params.get("go") == "1" and "go" not in st.session_state:
+        st.session_state["go"] = True
 
-    def t(key):
-        return T[key][i]
+    page = st.session_state["page"]
 
-    # Handle language switch cleanly
-    if "current_lang" not in st.session_state:
-        st.session_state["current_lang"] = lang
-        st.session_state["lang_version"] = 0
-    elif st.session_state["current_lang"] != lang:
-        old_v = st.session_state.get("lang_version", 0)
-        new_v = old_v + 1
-        st.session_state["lang_version"] = new_v
-        st.session_state["current_lang"] = lang
-        # Copy input values across language versions
-        for field in ["taluk", "soil", "season", "last_crop", "prev_crop", "irrigation", "priority", "usual_crop"]:
-            old_key = f"{field}_input_{old_v}"
-            new_key = f"{field}_input_{new_v}"
-            if old_key in st.session_state:
-                st.session_state[new_key] = st.session_state[old_key]
-        st.rerun()
-
-    # Track landing page vs form state
-    if "started" not in st.session_state:
-        st.session_state["started"] = False
-
-    # ── View routing ──
-    if not st.session_state["started"] and not st.session_state.get("go"):
+    # ── HOME / LANDING ──
+    if page == "home":
         render_hero(t, lang)
-        if st.button(t("start_btn"), type="primary", use_container_width=True):
-            st.session_state["started"] = True
+        if st.button(t("start_btn"), type="primary", use_container_width=True, key=f"start_btn_{v}"):
+            st.session_state["page"] = "form"
             st.rerun()
-    else:
+
+    # ── FORM ──
+    elif page == "form":
+        # Back to home
+        if st.button("← " + ("Home" if lang == "en" else "ಮುಖಪುಟ"), key=f"back_home_{v}"):
+            st.session_state["page"] = "home"
+            st.session_state.pop("go", None)
+            st.rerun()
+
         inputs, submitted = render_form(lang, i, t)
 
-        if submitted:
+        if submitted or (st.session_state.get("go") and "inputs" not in st.session_state):
             st.session_state["go"] = True
             st.session_state["inputs"] = inputs
 
+        # ── RESULTS ──
         if st.session_state.get("go") and "inputs" in st.session_state:
             render_results(st.session_state["inputs"], lang, i, t)
 
             # New recommendation button
-            st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
-            if st.button(f"↺ {t('back_to_top')}", use_container_width=True):
-                st.session_state["go"] = False
-                st.session_state["started"] = True
+            st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
+            if st.button(t("back_to_top"), use_container_width=True, key=f"new_rec_{v}"):
+                st.session_state.pop("go", None)
+                st.session_state.pop("inputs", None)
                 st.rerun()
 
-    # ── Disclaimer Footer ──
+    # ── Footer / Disclaimer ──
+    st.markdown("""
+    <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1.5px solid #DDE8D7;"></div>
+    """, unsafe_allow_html=True)
+
     st.markdown(clean_html(f"""
     <div style="
-        background: #FFFFFF;
-        border: 1.5px solid #DDE8D7;
-        border-radius: 14px;
-        padding: 1.1rem 1.2rem;
-        margin-top: 1.5rem;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        background: #F4F8F2;
+        border-left: 4px solid #2A5C2A;
+        border-radius: 10px;
+        padding: 1.1rem 1.3rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #122012;
+        line-height: 1.65;
+        font-family: 'Inter', 'Noto Sans Kannada', sans-serif;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        margin-bottom: 0.6rem;
     ">
-        <div style="font-size: 0.84rem; color: #4A6052; font-family: 'Inter', 'Noto Sans Kannada', sans-serif; line-height: 1.55;">
-            <strong style="color: #3D5240;">ℹ Prototype Disclaimer:</strong><br/>
-            {t("disclaimer_text")}
-        </div>
+        {t("disclaimer")}
     </div>
     """), unsafe_allow_html=True)
 
